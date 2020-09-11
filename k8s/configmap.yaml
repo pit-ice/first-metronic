@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sam2-frontend-configmap
+data:
+  default.conf: |
+    server {
+      listen 80;
+      listen [::]:80;
+
+      root /usr/share/nginx/html;
+
+      index index.html;
+
+      server_name _;
+
+      location / {
+        try_files $uri $uri/ @rewrites;
+      }
+
+      location /healthz {
+          access_log off;
+          return 200 "healthy\n";
+      }
+
+      location @rewrites {
+        rewrite ^(.+)$ /index.html last;
+      }
+
+      location ~* \.(?:ico|css|js|gif|jpe?g|png)$ {
+        expires max;
+        add_header Pragma public;
+        add_header Cache-Control "public, must-revalidate, proxy-revalidate";
+      }
+    }
